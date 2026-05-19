@@ -1,11 +1,6 @@
-import { motion } from "framer-motion";
-import { ExternalLink, Sparkles, Leaf } from "lucide-react";
-
-const GithubIcon = ({ className }) => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-  </svg>
-);
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Sparkles, X, ZoomIn } from "lucide-react";
 
 const tags = [
   "TensorFlow",
@@ -16,6 +11,8 @@ const tags = [
 ];
 
 export default function Projects() {
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+
   return (
     <section
       id="projects"
@@ -48,63 +45,44 @@ export default function Projects() {
           data-testid="project-leafscan"
         >
           <div className="grid lg:grid-cols-2 gap-0 items-stretch">
-            {/* Mockup side */}
-            <div className="relative bg-gradient-to-br from-emerald-50 via-purple-50 to-orange-50 p-10 sm:p-14 flex items-center justify-center min-h-[360px] order-2 lg:order-1">
+            {/* Project Screenshot */}
+            <div className="relative bg-gradient-to-br from-emerald-50 via-purple-50 to-orange-50 p-8 sm:p-12 flex items-center justify-center min-h-[360px] order-2 lg:order-1">
               <div className="absolute inset-6 dot-pattern opacity-50" />
 
-              <div className="relative w-full max-w-md">
-                {/* Stylized phone/screen mockup */}
-                <div className="bg-white rounded-3xl shadow-2xl shadow-purple-900/10 p-6 border border-slate-200">
-                  <div className="flex items-center gap-2 mb-4">
+              <div className="relative w-full max-w-lg">
+                {/* Browser frame - clickable */}
+                <div
+                  className="bg-white rounded-2xl shadow-2xl shadow-purple-900/10 overflow-hidden border border-slate-200 cursor-pointer group"
+                  onClick={() => setLightboxOpen(true)}
+                >
+                  <div className="flex items-center gap-2 px-4 py-3 bg-slate-50 border-b border-slate-100">
                     <div className="w-3 h-3 rounded-full bg-red-400" />
                     <div className="w-3 h-3 rounded-full bg-yellow-400" />
                     <div className="w-3 h-3 rounded-full bg-emerald-400" />
                     <span className="ml-auto font-mono-code text-xs text-slate-400">
-                      leafscan.ai
+                      leafscan.app
                     </span>
                   </div>
-
-                  <div className="aspect-video rounded-2xl bg-gradient-to-br from-emerald-400 via-emerald-500 to-teal-600 flex items-center justify-center mb-4 relative overflow-hidden">
-                    <div className="absolute inset-0 dot-pattern-orange opacity-30" />
-                    <Leaf className="w-20 h-20 text-white drop-shadow-2xl relative z-10" />
-                    <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-md bg-white/90 backdrop-blur font-mono-code text-[10px] text-slate-800 z-10">
-                      detecting…
-                    </div>
-                  </div>
-
-                  <div className="space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono-code text-xs text-slate-500">
-                        Tomato — Early Blight
-                      </span>
-                      <span className="font-bold text-emerald-600 text-sm">
-                        97.2%
-                      </span>
-                    </div>
-                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full"
-                        style={{ width: "97%" }}
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between pt-2">
-                      <span className="font-mono-code text-xs text-slate-400">
-                        Apple — Scab
-                      </span>
-                      <span className="text-slate-400 text-sm">2.1%</span>
-                    </div>
-                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-slate-300 rounded-full"
-                        style={{ width: "12%" }}
-                      />
+                  <div className="relative">
+                    <img
+                      src="/leafscan-preview.png"
+                      alt="LeafScan — Plant Disease Detection App"
+                      className="w-full h-auto block transition-transform duration-300 group-hover:scale-[1.02]"
+                    />
+                    {/* Hover overlay */}
+                    <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/20 transition-all duration-300 flex items-center justify-center">
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full flex items-center gap-2 shadow-lg">
+                        <ZoomIn className="w-4 h-4 text-slate-700" />
+                        <span className="text-sm font-bold text-slate-700">
+                          Click to preview
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Floating badge */}
-                <div className="absolute -top-5 -right-3 px-3 py-2 rounded-2xl bg-orange-500 text-white shadow-xl rotate-6 flex items-center gap-1.5">
+                <div className="absolute -top-4 -right-3 px-3 py-2 rounded-2xl bg-orange-500 text-white shadow-xl rotate-6 flex items-center gap-1.5 z-10">
                   <Sparkles className="w-4 h-4" />
                   <span className="font-display font-bold text-sm">
                     Featured
@@ -177,25 +155,6 @@ export default function Projects() {
                 ))}
               </div>
 
-              {/* Actions */}
-              <div className="mt-8 flex flex-wrap gap-3">
-                <a
-                  href="https://github.com/ZaidKhan1812"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-slate-900 text-white font-bold text-sm hover:bg-slate-800 hover:-translate-y-0.5 transition-all"
-                  data-testid="project-github-btn"
-                >
-                  <GithubIcon className="w-4 h-4" /> View on GitHub
-                </a>
-                <a
-                  href="#contact"
-                  className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-orange-500 text-white font-bold text-sm hover:bg-orange-600 hover:-translate-y-0.5 transition-all shadow-lg shadow-orange-500/30"
-                  data-testid="project-demo-btn"
-                >
-                  <ExternalLink className="w-4 h-4" /> Live Demo
-                </a>
-              </div>
             </div>
           </div>
         </motion.article>
@@ -228,6 +187,44 @@ export default function Projects() {
           ))}
         </motion.div>
       </div>
+
+      {/* Lightbox Modal */}
+      <AnimatePresence>
+        {lightboxOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8"
+            onClick={() => setLightboxOpen(false)}
+          >
+            {/* Backdrop */}
+            <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm" />
+
+            {/* Close button */}
+            <button
+              onClick={() => setLightboxOpen(false)}
+              className="absolute top-6 right-6 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+              aria-label="Close preview"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            {/* Image */}
+            <motion.img
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.85, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              src="/leafscan-preview.png"
+              alt="LeafScan — Plant Disease Detection App"
+              className="relative z-10 max-w-full max-h-[90vh] rounded-2xl shadow-2xl object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
