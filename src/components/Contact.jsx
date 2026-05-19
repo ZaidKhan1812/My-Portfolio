@@ -5,6 +5,7 @@ import {
   BarChart3,
   Send,
   ArrowUpRight,
+  CheckCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -55,24 +56,55 @@ const socials = [
   },
 ];
 
+// Web3Forms access key — get yours free at https://web3forms.com
+const WEB3FORMS_ACCESS_KEY = "2b57ce88-97c6-4a66-a3d3-f46ba8096e04";
+
 export default function Contact() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.message) {
       toast.error("Please fill in all fields.");
       return;
     }
+
     setSubmitting(true);
-    setTimeout(() => {
-      toast.success("Thanks! Your message is on its way.", {
-        description: "I'll get back to you within 24 hours.",
+
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          access_key: WEB3FORMS_ACCESS_KEY,
+          name: form.name,
+          email: form.email,
+          message: form.message,
+          subject: `New message from ${form.name} — Portfolio`,
+          from_name: "Portfolio Contact Form",
+        }),
       });
-      setForm({ name: "", email: "", message: "" });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSubmitted(true);
+        toast.success("Thanks! Your message has been sent.", {
+          description: "I'll get back to you within 24 hours.",
+        });
+        setForm({ name: "", email: "", message: "" });
+        // Reset success state after 5 seconds
+        setTimeout(() => setSubmitted(false), 5000);
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
+    } catch {
+      toast.error("Network error. Please check your connection.");
+    } finally {
       setSubmitting(false);
-    }, 700);
+    }
   };
 
   return (
@@ -87,7 +119,7 @@ export default function Contact() {
         {"// say_hi();"}
       </span>
 
-      <div className="relative max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 grid lg:grid-cols-2 gap-12 lg:gap-16">
+      <div className="relative max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
         {/* Left: CTA + socials */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -108,7 +140,7 @@ export default function Contact() {
             tell you honestly if I can help.
           </p>
 
-          <div className="mt-10 grid sm:grid-cols-2 gap-3">
+          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-3">
             {socials.map((s) => {
               const Icon = s.icon;
               return (
@@ -121,7 +153,7 @@ export default function Contact() {
                   data-testid={s.testid}
                 >
                   <div
-                    className={`w-11 h-11 rounded-xl ${s.color} text-white flex items-center justify-center shadow-md`}
+                    className={`w-11 h-11 flex-shrink-0 rounded-xl ${s.color} text-white flex items-center justify-center shadow-md`}
                   >
                     <Icon className="w-5 h-5" />
                   </div>
@@ -133,7 +165,7 @@ export default function Contact() {
                       {s.value}
                     </div>
                   </div>
-                  <ArrowUpRight className="w-4 h-4 text-slate-300 group-hover:text-orange-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                  <ArrowUpRight className="w-4 h-4 flex-shrink-0 text-slate-300 group-hover:text-orange-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
                 </a>
               );
             })}
@@ -147,11 +179,11 @@ export default function Contact() {
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.15 }}
           onSubmit={handleSubmit}
-          className="relative p-8 sm:p-10 rounded-3xl bg-purple-50 border-2 border-purple-100 shadow-xl shadow-purple-900/5"
+          className="relative p-6 sm:p-8 md:p-10 rounded-3xl bg-purple-50 border-2 border-purple-100 shadow-xl shadow-purple-900/5"
           data-testid="contact-form"
         >
           <div className="flex items-center justify-between mb-6">
-            <h3 className="font-display font-bold text-2xl text-slate-900">
+            <h3 className="font-display font-bold text-xl sm:text-2xl text-slate-900">
               Send a message
             </h3>
             <span className="font-mono-code text-xs text-purple-700">
@@ -159,41 +191,45 @@ export default function Contact() {
             </span>
           </div>
 
-          <div className="space-y-5">
-            <div>
-              <label
-                htmlFor="name"
-                className="font-mono-code text-xs uppercase tracking-widest text-slate-500"
-              >
-                Name
-              </label>
-              <input
-                id="name"
-                type="text"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="Your full name"
-                className="mt-1.5 w-full px-4 py-3.5 rounded-xl bg-white border-2 border-slate-100 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 outline-none transition-all"
-                data-testid="contact-input-name"
-              />
+          <div className="space-y-4 sm:space-y-5">
+            {/* Name & Email side by side on medium+ */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+              <div>
+                <label
+                  htmlFor="name"
+                  className="font-mono-code text-xs uppercase tracking-widest text-slate-500"
+                >
+                  Name
+                </label>
+                <input
+                  id="name"
+                  type="text"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  placeholder="Your full name"
+                  className="mt-1.5 w-full px-4 py-3 sm:py-3.5 rounded-xl bg-white border-2 border-slate-100 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 outline-none transition-all text-sm sm:text-base"
+                  data-testid="contact-input-name"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="email"
+                  className="font-mono-code text-xs uppercase tracking-widest text-slate-500"
+                >
+                  Email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  placeholder="you@example.com"
+                  className="mt-1.5 w-full px-4 py-3 sm:py-3.5 rounded-xl bg-white border-2 border-slate-100 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 outline-none transition-all text-sm sm:text-base"
+                  data-testid="contact-input-email"
+                />
+              </div>
             </div>
-            <div>
-              <label
-                htmlFor="email"
-                className="font-mono-code text-xs uppercase tracking-widest text-slate-500"
-              >
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="you@example.com"
-                className="mt-1.5 w-full px-4 py-3.5 rounded-xl bg-white border-2 border-slate-100 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 outline-none transition-all"
-                data-testid="contact-input-email"
-              />
-            </div>
+
             <div>
               <label
                 htmlFor="message"
@@ -203,11 +239,11 @@ export default function Contact() {
               </label>
               <textarea
                 id="message"
-                rows={5}
+                rows={4}
                 value={form.message}
                 onChange={(e) => setForm({ ...form, message: e.target.value })}
                 placeholder="Tell me about your project…"
-                className="mt-1.5 w-full px-4 py-3.5 rounded-xl bg-white border-2 border-slate-100 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 outline-none transition-all resize-none"
+                className="mt-1.5 w-full px-4 py-3 sm:py-3.5 rounded-xl bg-white border-2 border-slate-100 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 outline-none transition-all resize-none text-sm sm:text-base"
                 data-testid="contact-input-message"
               />
             </div>
@@ -215,11 +251,21 @@ export default function Contact() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-full bg-orange-500 text-white font-bold shadow-xl shadow-orange-500/30 hover:bg-orange-600 hover:-translate-y-0.5 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 sm:py-4 rounded-full bg-orange-500 text-white font-bold shadow-xl shadow-orange-500/30 hover:bg-orange-600 hover:-translate-y-0.5 transition-all disabled:opacity-60 disabled:cursor-not-allowed text-sm sm:text-base"
               data-testid="contact-submit-btn"
             >
               {submitting ? (
-                "Sending…"
+                <>
+                  <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Sending…
+                </>
+              ) : submitted ? (
+                <>
+                  <CheckCircle className="w-4 h-4" /> Sent!
+                </>
               ) : (
                 <>
                   Send Message <Send className="w-4 h-4" />
